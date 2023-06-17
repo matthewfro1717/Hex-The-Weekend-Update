@@ -19,7 +19,11 @@ class Character extends FlxSprite
 	public var curCharacter:String = 'bf';
 	public var barColor:FlxColor;
 
+	public var globalOffset:Array<Float> = new Array<Float>();
+	
 	public var holdTimer:Float = 0;
+
+	public var skins:Map<String, String> = new Map<String, String>();
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
 	{
@@ -55,7 +59,7 @@ class Character extends FlxSprite
 
 				loadOffsetFile(curCharacter + (isPlayer ? '-playable' : ''));
 				
-				globalOffset = [37, 90];
+				globalOffset = [-650, 90];
 				skins.set('recursed', 'bambi-recursed');
 
 				playAnim('idle');
@@ -70,7 +74,7 @@ class Character extends FlxSprite
 				}
 				animation.addByPrefix('hey', 'hey', 24, false);
 	
-				globalOffset = [0, -170];
+				globalOffset = [-280, -120];
 
 				skins.set('recursed', 'dave-recursed');
 				loadOffsetFile(curCharacter + (isPlayer ? '-playable' : ''));
