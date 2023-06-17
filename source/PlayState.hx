@@ -350,10 +350,8 @@ class PlayState extends MusicBeatState
 		{
 			remove(i);
 		}
-		#if windows
 		if (luaModchart != null)
 			luaModchart.die();
-		#end
 		songScoreDef = 0;
 		songScore = 0;
 		unspawnNotes = [];
@@ -661,7 +659,7 @@ class PlayState extends MusicBeatState
 
 		if (isStoryMode)
 			songMultiplier = 1;
-		#if windows
+
 		if (Stage.curStage == "hexw" && SONG.songId.toLowerCase() == "cooling")
 		{
 			coolingVideo = new FlxSprite(-24, -224);
@@ -672,10 +670,8 @@ class PlayState extends MusicBeatState
 			Debug.logTrace("starting vis");
 			if (coolingHandler == null)
 			{
-			#if windows
 				coolingHandler = new MP4Handler();
 				coolingHandler.playMP4(Paths.video('coolingVisualizer'), null, coolingVideo, false, false, true);
-				#end
 			}
 			else
 			{
@@ -688,7 +684,6 @@ class PlayState extends MusicBeatState
 			}
 			coolingVideo.alpha = 0;
 		}
-		#end
 
 		for (i in Stage.toAdd)
 		{
@@ -1875,9 +1870,8 @@ class PlayState extends MusicBeatState
 	public var bar:FlxSprite;
 
 	public var previousRate = songMultiplier;
-	#if windows
+
 	public var coolingHandler:MP4Handler = null;
-	#end
 
 	function startSong():Void
 	{
@@ -1989,7 +1983,7 @@ class PlayState extends MusicBeatState
 			FlxTween.tween(skipText, {alpha: 1}, 0.2);
 			add(skipText);
 		}
-		#if windows
+
 		if (Stage.curStage == "hexw" && SONG.songId.toLowerCase() == "cooling")
 		{
 			var perecentSupposed = (FlxG.sound.music.time / songMultiplier) / (FlxG.sound.music.length / songMultiplier);
@@ -1997,7 +1991,6 @@ class PlayState extends MusicBeatState
 			Debug.logTrace("doing the thing");
 			FlxTween.tween(coolingVideo, {alpha: 1}, 1);
 		}
-		#end
 	}
 
 	var debugNum:Int = 0;
@@ -2347,12 +2340,11 @@ class PlayState extends MusicBeatState
 					if (vocals.playing)
 						vocals.pause();
 			}
-			#if windows
+
 			if (Stage.curStage == "hexw" && songStarted && SONG.songId.toLowerCase() == "cooling")
 			{
 				coolingHandler.bitmap.pause();
 			}
-			#end
 
 			#if FEATURE_DISCORD
 			DiscordClient.changePresence("PAUSED on "
@@ -2397,14 +2389,13 @@ class PlayState extends MusicBeatState
 			{
 				resyncVocals();
 			}
-			#if windows
+
 			if (Stage.curStage == "hexw" && songStarted && SONG.songId.toLowerCase() == "cooling")
 			{
 				var perecentSupposed = (FlxG.sound.music.time / songMultiplier) / (FlxG.sound.music.length / songMultiplier);
 				coolingHandler.bitmap.seek(perecentSupposed); // I laughed my ass off so hard when I found out this was a fuckin PERCENTAGE
 				coolingHandler.bitmap.resume();
 			}
-			#end
 
 			if (startTimer != null)
 				if (!startTimer.finished)
@@ -2696,8 +2687,14 @@ class PlayState extends MusicBeatState
 		}
 		if (PlayStateChangeables.botPlay && FlxG.keys.justPressed.ONE)
 			camHUD.visible = !camHUD.visible;
-			#if windows
-		#end
+		if (useVideo && GlobalVideo.get() != null && !stopUpdate)
+		{
+			if (GlobalVideo.get().ended && !removedVideo)
+			{
+				remove(videoSprite);
+				removedVideo = true;
+			}
+		}
 		#if FEATURE_LUAMODCHART
 		if (executeModchart && luaModchart != null && songStarted)
 		{
@@ -2785,6 +2782,7 @@ class PlayState extends MusicBeatState
 			songMultiplier = 1;
 			if (useVideo)
 			{
+				GlobalVideo.get().stop();
 				remove(videoSprite);
 				removedVideo = true;
 			}
@@ -2807,6 +2805,7 @@ class PlayState extends MusicBeatState
 			songMultiplier = 1;
 			if (useVideo)
 			{
+				GlobalVideo.get().stop();
 				remove(videoSprite);
 				removedVideo = true;
 			}
@@ -2855,6 +2854,7 @@ class PlayState extends MusicBeatState
 		{
 			if (useVideo)
 			{
+				GlobalVideo.get().stop();
 				remove(videoSprite);
 				removedVideo = true;
 			}
@@ -2877,6 +2877,7 @@ class PlayState extends MusicBeatState
 				paused = true;
 				if (useVideo)
 				{
+					GlobalVideo.get().stop();
 					remove(videoSprite);
 					removedVideo = true;
 				}
@@ -2981,13 +2982,11 @@ class PlayState extends MusicBeatState
 			// Conductor.songPosition = FlxG.sound.music.time;
 			Conductor.songPosition += FlxG.elapsed * 1000;
 			Conductor.rawPosition = FlxG.sound.music.time;
-			#if windows
 			if (coolingVideo != null)
 			{
 				if (!coolingHandler.bitmap.isPlaying && !paused && !endingSong)
 					coolingHandler.bitmap.resume();
 			}
-			#end
 			// sync
 			/*@:privateAccess
 				{
@@ -3855,6 +3854,7 @@ class PlayState extends MusicBeatState
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, releaseInput);
 		if (useVideo)
 		{
+			GlobalVideo.get().stop();
 			PlayState.instance.remove(PlayState.instance.videoSprite);
 		}
 
@@ -4707,16 +4707,14 @@ class PlayState extends MusicBeatState
 
 	public var fuckingVolume:Float = 1;
 	public var useVideo = false;
-	#if windows
+
 	public static var webmHandler:WebmHandler;
-	#end
 
 	public var playingDathing = false;
 	public var videoSprite:FlxSprite;
 
 	public function backgroundVideo(source:String) // for background videos
 	{
-	#if windows
 		#if FEATURE_WEBM
 		useVideo = true;
 
@@ -4767,7 +4765,6 @@ class PlayState extends MusicBeatState
 			webmHandler.pause();
 		else
 			webmHandler.resume();
-		#end
 		#end
 	}
 
